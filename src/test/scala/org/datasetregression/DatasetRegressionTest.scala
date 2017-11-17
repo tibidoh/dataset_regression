@@ -21,11 +21,11 @@ class DatasetRegressionTest extends FlatSpec with Matchers with PerTestSparkSess
       TestRecord("match", Some(100))
     ))
 
-    val regression = DatasetRegression(
+    val regression = DatasetRegression[TestRecord](
       reference,
       test,
-      extractKey = (r: TestRecord) => Map("k" -> r.key),
-      extractFields = (r: TestRecord) => Map("f" -> r.value),
+      extractKey = r => Map("k" -> r.key),
+      extractFields = r => Map("f" -> r.value),
       counters = noCounters
     )
 
@@ -56,11 +56,11 @@ class DatasetRegressionTest extends FlatSpec with Matchers with PerTestSparkSess
       TestRecord("rt", Some(2))
     ))
 
-    val regression = DatasetRegression(
+    val regression = DatasetRegression[TestRecord](
       reference,
       test,
-      extractKey = (r: TestRecord) => Map("k" -> r.key),
-      extractFields = (r: TestRecord) => Map("f" -> r.value),
+      extractKey = r => Map("k" -> r.key),
+      extractFields = r => Map("f" -> r.value),
       counters = noCounters
     )
 

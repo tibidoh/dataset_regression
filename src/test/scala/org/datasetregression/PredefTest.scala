@@ -12,11 +12,11 @@ class PredefTest extends FlatSpec with Matchers with PerTestSparkSession {
       TestRecord("diffInField", Some(2))
     ))
 
-    val regression = DatasetRegression(
+    val regression = DatasetRegression[TestRecord](
       reference,
       test,
-      extractKey = (r: TestRecord) => Map("k" -> r.key),
-      extractFields = (r: TestRecord) => Map("f" -> r.value),
+      extractKey = r => Map("k" -> r.key),
+      extractFields = r => Map("f" -> r.value),
       counters = standardCounters("some-tag")
     )
 
@@ -33,11 +33,11 @@ class PredefTest extends FlatSpec with Matchers with PerTestSparkSession {
       TestRecord("diffInField", Some(2))
     ))
 
-    val regression = DatasetRegression(
+    val regression = DatasetRegression[TestRecord](
       reference,
       test,
-      extractKey = (r: TestRecord) => Map("k" -> r.key),
-      extractFields = (r: TestRecord) => Map("f" -> r.value),
+      extractKey = r => Map("k" -> r.key),
+      extractFields = r => Map("f" -> r.value),
       counters = noCounters
     )
 
