@@ -71,4 +71,60 @@ class DatasetRegressionTest extends FlatSpec with Matchers with PerTestSparkSess
     diff should contain(DuplicateReferenceSample(Map("k" -> "r")))
     diff should contain(DuplicateReferenceSample(Map("k" -> "rt")))
   }
+
+  it should "allow to override equality condition by type" in {
+    val reference = sc.makeRDD(Seq(
+      TestRecord("k", Some(1.5))
+    ))
+
+    val test = sc.makeRDD(Seq(
+      TestRecord("k", Some(1.4))
+    ))
+
+    val regression = DatasetRegression[TestRecord](
+      reference,
+      test,
+      extractKey = r => Map("k" -> r.key),
+      extractFields = r => Map("f" -> r.value),
+      counters = noCounters,
+      equalityOverride = {
+        case (_, t: Double, r: Double) => (t - r).abs < 0.5 // equal +- 0.5
+      }
+    )
+
+    val diff = regression.diff.collect()
+    diff shouldBe empty
+  }
+
+  case class Sample(key: String, regularField: Double, modifiedField: Double)
+
+  it should "allow to override equality condition by field" in {
+
+    //Test sample one has difference in double representation of the second field. This must be handled by equality override
+    //Test sample two has same difference in the third field. This should produce a diff
+
+    val reference = sc.makeRDD(Seq(
+      ("1", "0.1", "0.1"),
+      ("2", "0.1", "0.1")
+    ))
+
+    val test = sc.makeRDD(Seq(
+      ("1", "1E-1", "0.1"),
+      ("2", "0.1", "1E-1")
+    ))
+
+    val regression = DatasetRegression[(String, String, String)](
+      reference,
+      test,
+      extractKey = r => Map("key" -> r._1),
+      extractFields = r => Map("two" -> Some(r._2), "three" -> Some(r._3)),
+      counters = noCounters,
+      equalityOverride = {
+        case ("two", t: String, r: String) => t.toDouble == r.toDouble
+      }
+    )
+
+    val diff = regression.diff.collect()
+    diff should matchPattern { case Array(DiscrepantSample(_, DiscrepantField("three", "0.1", "1E-1") :: Nil)) => }
+  }
 }
