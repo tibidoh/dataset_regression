@@ -4,7 +4,8 @@ Big data applications built with Spark or Hadoop often produce datasets as serie
 Building regression tooling for such application can be a tedious task, but it can be greatly simplified with this fixture. It uses Spark to find matching samples
 in both data sets, generate a human readable diff, detect duplicates and automatically generate basic stats of a regression run.
 
-###Launching regression
+### Launching regression
+
 The fixture does not rely on underlying data format, but instead uses user defined closures to extract a key and values from a data sample. This allow it to be
 agnostic of data type, while being able to support file format specific DSLs for data extraction.
 
