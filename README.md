@@ -4,6 +4,7 @@ Big data applications built with Spark or Hadoop often produce datasets as serie
 Building regression tooling for such application can be a tedious task, but it can be greatly simplified with this fixture. It uses Spark to find matching samples
 in both data sets, generate a human readable diff, detect duplicates and automatically generate basic stats of a regression run.
 
+###Launching regression
 The fixture does not rely on underlying data format, but instead uses user defined closures to extract a key and values from a data sample. This allow it to be
 agnostic of data type, while being able to support file format specific DSLs for data extraction.
 
@@ -56,3 +57,27 @@ val regression = DatasetRegression[ShuttleLaunch](
     }
 )
 ```
+
+### Results interpretation
+
+Result of regression is returned as `RegressionResult` object containing two filds:
+
+`counters:Map[String, Long]`  - A set of counters created by a function passed to 'counters' parameter.
+
+`diff:RDD[SampleDiff]` - RDD of objects describing diffs found between two input RDDs. Each SampleDiff object has 
+a `key` field which (surprise) hold it's key. Several possible cases supported:
+ * `DiscrepantSample` - Samples from input datasets successfully matched but one or more field values are different
+ * `MissingReferenceSample` - Sample found in test dataset is missing from reference dataset
+ * `MissingTestSample` - Sample found in reference dataset is missing in test dataset
+ * `DuplicateReferenceSample` - Multiple samples found for the same key in reference dataset (Usually means incorrectly configured key extraction)
+ * `DuplicateTestSample` - Multiple samples found for the same key in test dataset (Usually means incorrectly configured key extraction)
+ 
+ ### Note on counters
+ The ultimate goal of regression testing fixture is to decide whether there was a regression or not.
+ `counters` callback is intended for passing through all 3 RDD's: reference, test and diffs and computing 
+ basic metrics such as count of diffs, volume of input data, etc. 
+ 
+ Although result assessment can be done
+ outside of regression fixture, having counters as a dedicated callback serves two purposes: It makes reusing standard ways of 
+ regression result assessment easier as well as facilitates parallel execution of built-in counters
+ implementation.
