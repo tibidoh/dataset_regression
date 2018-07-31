@@ -1,15 +1,15 @@
 # Dataset regression tool
 
-Big data applications built with Spark or Hadoop often produce datasets as series of files with no particular guarantee of neither distribution of data samples between the files, nor ordering within a file.
-Building regression tooling for such application can be a tedious task, but it can be greatly simplified with this fixture. It uses Spark to find matching samples
-in both data sets, generate a human readable diff, detect duplicates and automatically generate basic stats of a regression run.
+Big data applications built with Spark or Hadoop produce datasets as series of files with no particular guarantee of neither distribution of data samples between the files, nor ordering within a file.
+Building regression tooling for such application can be a tedious task, but can be greatly simplified with this fixture. It uses Spark to find matching samples
+in reference and tested data sets, generates human readable diffs, detects duplicates and automatically generates basic stats of a regression run.
 
-### Launching regression
+### Configuring and launching
 
-The fixture does not rely on underlying data format, but instead uses user defined closures to extract a key and values from a data sample. This allow it to be
-agnostic of data type, while being able to support file format specific DSLs for data extraction.
+The fixture does not rely on underlying data format. Instead, it uses user defined closures to extract a key and values from a data sample. This allows it to be
+agnostic of data format and type, while being able to support data type specific DSLs for data extraction.
 
-For example, a regression call for a typed dataset may look like
+A simple call to regression fixture for typed input may look like:
 ```scala
 case class ShuttleLaunch(num: Int, timestamp: LocalDateTime, vessel: String)
 
@@ -25,7 +25,7 @@ val regression = DatasetRegression[ShuttleLaunch](
 )
 ```
 
-For a weakly typed dataset, such as in json format, a similar call may look like this:
+For a weakly typed input, such as in json lines, a similar call may look like the following:
 ```scala
 import org.json4s.JsonAST._
 
@@ -42,10 +42,10 @@ val regression = DatasetRegression[JObject](
     counters = standardCounters
 )
 ```
-Note using a DSL for key and value extraction. This could also be done manually like in the first example.
+Note using a DSL for key and value extraction. This could also be done manually like in the first example, though.
 
-In certain cases we might need different equality conditions for some of data types or fields. For instance, if we only care about the date of the launch,
-but not an exact instant, it can be done with an override:
+In certain cases we might need different equality conditions for some of the fields. For instance, if we want to tolerate different
+times of launch but only want to compare dates, it can be done with an override:
 ```scala
 val regression = DatasetRegression[ShuttleLaunch](
     reference,
@@ -61,7 +61,7 @@ val regression = DatasetRegression[ShuttleLaunch](
 
 ### Results interpretation
 
-Result of regression is returned as `RegressionResult` object containing two filds:
+Result of regression is returned as `RegressionResult` object containing two fields:
 
 `counters:Map[String, Long]`  - A set of counters created by a function passed to 'counters' parameter.
 
