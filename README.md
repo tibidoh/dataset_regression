@@ -76,9 +76,9 @@ a `key` field which (surprise) hold it's key. Several possible cases supported:
 ### Note on counters
 The ultimate goal of regression testing fixture is to decide whether there was a regression or not.
 `counters` callback is intended for passing through all 3 RDD's: reference, test and diffs and computing 
-basic metrics such as count of diffs, volume of input data, etc. 
+basic metrics such as count of diffs, volume of input data, etc. which can help to make the decision of whether there
+was indeed regression.
  
-Although result assessment can be done
-outside of regression fixture, having counters as a dedicated callback serves two purposes: It makes reusing standard ways of 
-regression result assessment easier as well as facilitates parallel execution of built-in counters
-implementation.
+Although result assessment can be done outside of regression fixture, having counters as a dedicated callback
+serves two purposes: It makes reusing standard ways of regression result assessment easier as well as facilitates 
+parallel execution of built-in counters implementation.
